@@ -15,11 +15,11 @@ exports.postAddProduct = (req, res, next) => {
   const description = req.body.description;
   const product = new Product(null, title, imageUrl, description, price);
   product
-  .save()
-  .then(()=>{
-    res.redirect('/');
-  })
-  .catch(err=>console.log(err));
+    .save()
+    .then(() => {
+      res.redirect('/');
+    })
+    .catch(err => console.log(err));
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -76,4 +76,5 @@ exports.postDeleteProduct = (req, res, next) => {
     res.redirect('/admin/products');
   })
   .catch((err)=>console.log(err));
+ 
 };
