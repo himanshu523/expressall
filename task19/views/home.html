@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Full stack Expense App</title>
+    
+  </head>
+  <body>
+    <header class="main-header">
+      <nav class="main-header__nav">
+        <h2>Full stack Expense App</h2>
+      </nav>
+    </header>
+
+    <main>
+      <form class="form" action="#" onsubmit="saveToLocalStorage(event)">
+        <div class="form-control">
+          <label>Choose Expenses Amount</label>
+          <input type="text" id="expenses" placeholder="Expenses Amount" /><br>
+          <label>Choose Description</label>
+          <input type="text" id="description" placeholder="Enter Description" /><br>
+          <label>Choose Category</label>
+          <select id="category">
+            <option value="Fuel">Fuel</option>
+            <option value="Food">Food</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Movie">Movie</option>
+          </select><br>
+        </div>
+        <button type="submit">Submit</button>
+      </form><br>
+      <hr width="100%" size="5px" style="background-color: black" />
+      <ul id="expenseTracker"></ul>
+  </main>
+
+    <!-- add axios libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.3/axios.min.js"></script>
+
+    <script>
+         // Function for Save Data On Screen
+      function saveToLocalStorage(event) {
+        // To prevent a page from reloading or a new link from opening in jQuery, use the event.preventDefault() method.
+        event.preventDefault();
+        const expenses = event.target.expenses.value;
+        const description = event.target.description.value;
+        const category = event.target.category.value;
+
+        // Lets store the users in the right format ->
+        const obj = {
+          expenses,
+          description,
+          category,
+        };
+
+        // add axios libraries'post' - Saving the user Details in database
+        axios
+          .post("http://localhost:5000/add", obj)
+          .then((response) => {
+            showNewUserOnScreen(response.data.newExpenses);
+            console.log(response);
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML + "<h4> Something went wrong </h4>";
+            console.log(err);
+          });
+      }
+
+         // Function for Show User Data On Screen
+      // update function showNewUserOnScreen(user) for Deleting the Data -> Add Delete Button
+      // update function showNewUserOnScreen(user) for Editing the Data -> Add Edit Button
+      function showNewUserOnScreen(user) {
+        // After submit clear input field
+        document.getElementById("expenses").value = '';
+        document.getElementById("description").value = '';
+        document.getElementById("category").value = '';
+
+        const parentNode = document.getElementById("expenseTracker");
+        const childHTML = `<li id=${user.id}> ${user.expenses} - ${user.description} - ${user.category}
+                                 <button onclick=deleteUser('${user.id}')> Delete User </button>
+                                 <button onclick=editUserDetails('${user.expenses}','${user.description}','${user.category}','${user.id}')> Edit </button>
+                           </li>`;
+
+        parentNode.innerHTML = parentNode.innerHTML + childHTML;
+      }
+
+      // add axios libraries'get' - Get the saved Expenses Details from database
+      // The DOMContentLoaded event fires when the initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading.
+      window.addEventListener("DOMContentLoaded", () => {
+        axios
+          .get("http://localhost:5000/get-data")
+          .then((response) => {
+            console.log(response);
+
+            for (var i = 0; i < response.data.newExpenses.length; i++) {
+              showNewUserOnScreen(response.data.newExpenses[i]);
+            }
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML +
+              "<h4> Something went wrong in .get</h4>";
+            console.log(err);
+          });
+      });
+
+      // Function for Deleting the Data of database
+      function deleteUser(userId) {
+        axios.delete(`http://localhost:5000/delete-data/${userId}`)
+          .then((response) => {
+            console.log(response);
+            // for delete data from screen
+            removeUserFromScreen(userId);
+          })
+          .catch((err) => {
+            document.body.innerHTML =
+              document.body.innerHTML +
+              "<h4> Something went wrong in .delete</h4>";
+            console.log(err);
+          });
+      }
+
+      // function for Deleting the Data form Screen
+      function removeUserFromScreen(userId) {
+        const parentNode = document.getElementById("expenseTracker");
+        const childNodeToBeDeleted = document.getElementById(userId);
+
+        if (childNodeToBeDeleted) {
+          parentNode.removeChild(childNodeToBeDeleted);
+        }
+      }
+
+      // Function for Editing the Data of database.
+      function editUserDetails(expenses, description, category, userId) {
+        document.getElementById("expenses").value = expenses;
+        document.getElementById("description").value = description;
+        document.getElementById("category").value = category;
+
+        // for delete previous data after clicking on edit button
+        deleteUser(userId);
+      }
+    </script>
+  </body>
+</html>
