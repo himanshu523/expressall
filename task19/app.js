@@ -12,15 +12,14 @@ app.use(homeRoutes);
 
 
 const path = require("path");
-app.use(express.static(path.join(__dirname, "public")));
 
-
-//var cors = require("cors");
-//app.use(cors());
+app.get('/favicon.ico',(req,res)=>  res.status(204).end());
 
 
 const errorController = require("./controllers/error");
 app.use(errorController.get404);
+
+
 
 
 const sequelize = require("./util/database");

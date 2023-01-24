@@ -4,7 +4,7 @@ const rootDir = require("../util/path");
 
 
 exports.getHome = (req, res, next) => {
-  console.log("GOT HOME");
+  console.log(" HOME");
   res.sendFile(path.join(rootDir, "views", "home.html"));
 };
 
